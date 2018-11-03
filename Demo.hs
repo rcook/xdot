@@ -78,7 +78,16 @@ run file = do
             return True
 
     widgetShowAll window
-    on window destroyEvent $ lift $ mainQuit >> return True
+    on window destroyEvent $ do
+        lift $ putStrLn "Event: window.destroyEvent"
+        lift $ mainQuit
+        return True
+
+    on window objectDestroy $ do
+        putStrLn "Event: window.objectDestroy"
+        mainQuit
+        return ()
+
     mainGUI
 
 click :: IORef State -> R.DotGraph String -> IO ()
