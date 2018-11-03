@@ -29,55 +29,57 @@ data State = State
 
 main :: IO ()
 main = do
-  args <- getArgs
-  quitWithoutGraphviz "Cannot continue: Graphviz is not installed"
-  if length args == 1 then run $ head args else error "Usage: Demo file.dot"
+    putStrLn "Hello world"
+    args <- getArgs
+    quitWithoutGraphviz "Cannot continue: Graphviz is not installed"
+    if length args == 1 then run $ head args else error "Usage: Demo file.dot"
 
 run :: String -> IO ()
 run file = do
-  dotText <- L.readFile file
-  -- If dg is a G.DotGraph it fails when there's a subgraph in it
-  let dg = parseDotGraph dotText :: R.DotGraph String
+    dotText <- L.readFile file
+    -- If dg is a G.DotGraph it fails when there's a subgraph in it
+    let dg = parseDotGraph dotText :: R.DotGraph String
 
-  -- You can choose another graphviz command by changing Dot to Neato, TwoPi, Circo or Fdp
-  xdg <- graphvizWithHandle Dot dg (XDot Nothing) hGetDot
+    -- You can choose another graphviz command by changing Dot to Neato, TwoPi, Circo or Fdp
+    xdg <- graphvizWithHandle Dot dg (XDot Nothing) hGetDot
 
-  let objs = (getOperations xdg, getSize xdg)
+    let objs = (getOperations xdg, getSize xdg)
 
-  --putStrLn $ show xdg
-  --putStrLn $ show objs
+    --putStrLn $ show xdg
+    --putStrLn $ show objs
 
-  state <- newIORef $ State objs [] (0,0) None
+    state <- newIORef $ State objs [] (0,0) None
 
-  initGUI
-  window <- windowNew
-  canvas <- drawingAreaNew
+    initGUI
+    window <- windowNew
+    canvas <- drawingAreaNew
 
-  set window [ windowTitle := "XDot Demo"
-             , containerChild := canvas
-             ]
+    set window
+        [ windowTitle := "project-graph"
+        , containerChild := canvas
+        ]
 
-  on canvas draw $ do
-    redraw canvas state
+    on canvas draw $ do
+        redraw canvas state
 
-  on canvas motionNotifyEvent $ do
-    (x,y) <- eventCoordinates
-    lift $ do
-      modifyIORef state (\s -> s {mousePos = (x,y)})
-      tick canvas state
-      return True
+    on canvas motionNotifyEvent $ do
+        (x, y) <- eventCoordinates
+        lift $ do
+            modifyIORef state (\s -> s {mousePos = (x,y)})
+            tick canvas state
+            return True
 
-  on canvas buttonPressEvent $ do
-    button <- eventButton
-    eClick <- eventClick
-    lift $ do
-        when (button == LeftButton && eClick == SingleClick) $
-          click state dg
-        return True
+    on canvas buttonPressEvent $ do
+        button <- eventButton
+        eClick <- eventClick
+        lift $ do
+            when (button == LeftButton && eClick == SingleClick) $
+                click state dg
+            return True
 
-  widgetShowAll window
-  on window destroyEvent $ lift $ mainQuit >> return True
-  mainGUI
+    widgetShowAll window
+    on window destroyEvent $ lift $ mainQuit >> return True
+    mainGUI
 
 click :: IORef State -> R.DotGraph String -> IO ()
 click state _dg = do
