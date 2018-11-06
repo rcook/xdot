@@ -17,7 +17,7 @@ import Graphics.XDot.Types hiding (w, h, filled, alignment, text, name, size)
 import Graphics.UI.Gtk (PangoRectangle(..), layoutSetFontDescription,
   layoutGetExtents, layoutContextChanged, fontDescriptionFromString,
   fontDescriptionSetSize, showLayout, cairoContextSetFontOptions,
-  cairoContextGetFontOptions, layoutGetContext, createLayout)
+  layoutGetContext, createLayout)
 import Graphics.Rendering.Cairo hiding (x, y)
 
 import Control.Monad.State hiding (State)
@@ -157,7 +157,13 @@ draw hover (mn, Text (x,y) alignment w text) = do
   layout <- lift $ createLayout text
   context <- liftIO $ layoutGetContext layout
 
+
+  {- Pseudo-code: requires cairoContextGetFontOptions to not fail on null
   fo <- liftIO $ cairoContextGetFontOptions context
+  fo <- if isNull fo then fontOptionsCreate else return fo
+  -}
+
+  fo <- fontOptionsCreate
 
   fontOptionsSetAntialias fo AntialiasDefault
   fontOptionsSetHintStyle fo HintStyleNone
