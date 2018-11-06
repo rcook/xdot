@@ -157,12 +157,14 @@ draw hover (mn, Text (x,y) alignment w text) = do
   layout <- lift $ createLayout text
   context <- liftIO $ layoutGetContext layout
 
+  {-
   fo <- liftIO $ cairoContextGetFontOptions context
 
   fontOptionsSetAntialias fo AntialiasDefault
   fontOptionsSetHintStyle fo HintStyleNone
   fontOptionsSetHintMetrics fo HintMetricsOff
   liftIO $ cairoContextSetFontOptions context fo
+  -}
 
   liftIO $ layoutContextChanged layout
 
